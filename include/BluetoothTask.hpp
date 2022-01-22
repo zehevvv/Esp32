@@ -36,5 +36,5 @@ private:
     BLEService *m_service;
     bool m_is_get_new_data = false;
 
-    static const int STATUS_INTERVAL = 3000;
+    static const int STATUS_INTERVAL = 10000;
 };

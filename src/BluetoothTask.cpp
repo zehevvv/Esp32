@@ -232,4 +232,5 @@ void BluetoothTask::WriteToBLE(byte *buff, int buffLength)
     // }
     // LOG << "\n";
     m_characteristic->setValue(buff, buffLength);
+    m_characteristic->notify();
 }
