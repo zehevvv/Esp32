@@ -20,7 +20,7 @@ private:
     void ReadFromBle();
     void Parse(byte newByte);
     void ReverseOne();
-    void HandleCmd(int cmdId, byte *buff, uint8_t command_counter,int buffLength);
+    void HandleCmd(int cmdId, byte *buff, int buffLength);
     void HandleGetBatteryLevelCmd();
     void HandleSetLevelVibrationCmd(byte* buff, int buffLength);
     void HandleGetLevelVibrationCmd();
@@ -28,8 +28,7 @@ private:
     void WriteToBLE(byte* buff, int buffLength);
 
     byte m_bufReceive[10];
-    uint8_t m_counter;
-    int m_last_command_counter;
+    uint8_t m_counter;    
     BLEServer *m_server = NULL;
     BLECharacteristic *m_characteristic;
     bool m_device_connected = false;

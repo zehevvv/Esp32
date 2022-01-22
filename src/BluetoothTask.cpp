@@ -7,8 +7,7 @@
 using namespace std;
 
 BluetoothTask::BluetoothTask() : 
-    m_counter(0),
-    m_last_command_counter(200)
+    m_counter(0)    
 {
     // Create the BLE Device
     BLEDevice::init(BLUETOOTH_APP_NAME);
@@ -86,7 +85,7 @@ void BluetoothTask::HandleSetLevelVibrationCmd(byte *buff, int buffLength)
 
 void BluetoothTask::HandleGetLevelVibrationCmd()
 {
-    LOG << "Get command \"Get level vibration\" \n";
+    // LOG << "Get command \"Get level vibration\" \n";
     byte cmd[6];
     cmd[0] = '<';
     cmd[1] = 0; // ID
@@ -109,14 +108,8 @@ void BluetoothTask::HandleGetBatteryLevelCmd()
     WriteToBLE(cmd, sizeof(cmd));
 }
 
-void BluetoothTask::HandleCmd(int cmdId, byte *buff, uint8_t command_counter, int buffLength)
+void BluetoothTask::HandleCmd(int cmdId, byte *buff, int buffLength)
 {
-    // Check if this command is new
-    if (command_counter == m_last_command_counter)
-        return;
-
-    m_last_command_counter = command_counter;
-
     switch (cmdId)
     {
     case 0:
@@ -157,7 +150,7 @@ void BluetoothTask::Parse(byte newByte)
             ReverseOne();
         }
         // Check if not have enough bytes for minimum cmd
-        else if (m_counter < 6)
+        else if (m_counter < 5)
         {
             return;
         }
@@ -167,29 +160,28 @@ void BluetoothTask::Parse(byte newByte)
             int cmdLength = m_bufReceive[3] + (m_bufReceive[2] << 8);
 
             // Check if the command is more than buffer can hold
-            if (cmdLength > sizeof(m_bufReceive) - 6)
+            if (cmdLength > sizeof(m_bufReceive) - 5)
             {
                 LOG << "Error: Cmd length is " << cmdLength << "\n";
                 ReverseOne();
             }
             // Check if not get all the bytes of the command
-            else if (m_counter < cmdLength + 6)
+            else if (m_counter < cmdLength + 5)
             {
                 return;
             }
             // Check if not get the '>' (end of the command)
-            else if (m_bufReceive[cmdLength + 5] != '>')
+            else if (m_bufReceive[cmdLength + 4] != '>')
             {
-                LOG << "buff " << m_bufReceive[0] << " " << m_bufReceive[1] << " " << m_bufReceive[2] << " " << m_bufReceive[3] << " " << m_bufReceive[4] << " " << m_bufReceive[5] << " " << m_bufReceive[6] << " "
-                    << "\n";
-                LOG << "Error: The last letter is not '>', it is " << m_bufReceive[cmdLength + 5] << "\n";
+                                
+                LOG << "Error: The last letter is not '>', it is " << m_bufReceive[cmdLength + 4] << "\n";
                 ReverseOne();
             }
             // Parse command success!!!
             else
             {
                 LOG << "Get command - " << (int)m_bufReceive[1] << ", command size - " << cmdLength << "\n";
-                HandleCmd((int)m_bufReceive[1], &m_bufReceive[5], m_bufReceive[4], cmdLength);
+                HandleCmd((int)m_bufReceive[1], &m_bufReceive[4], cmdLength);
 
                 // Assumming that the counter is point to last char of the command.
                 m_counter = 0;
