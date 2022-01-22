@@ -12,7 +12,9 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint32_t value = 0;
 
-BluetoothTask::BluetoothTask() : m_counter(0)
+BluetoothTask::BluetoothTask() : 
+    m_counter(0),
+    m_last_command_counter(200)
 {
     // Create the BLE Device
     BLEDevice::init("ISee2");
@@ -165,8 +167,14 @@ void BluetoothTask::HandleGetBatteryLevelCmd()
     WriteToBLE(cmd, sizeof(cmd));
 }
 
-void BluetoothTask::HandleCmd(int cmdId, byte *buff, int buffLength)
+void BluetoothTask::HandleCmd(int cmdId, byte *buff, uint8_t command_counter,int buffLength)
 {
+    // Check if this command is new
+    if (command_counter == m_last_command_counter)
+        return;
+
+    m_last_command_counter = command_counter;
+
     switch (cmdId)
     {
     case 0:
@@ -189,7 +197,7 @@ void BluetoothTask::ReverseOne()
     {
         m_bufReceive[i] = m_bufReceive[i + 1];
     }
-
+    
     m_counter--;
 }
 
@@ -203,11 +211,11 @@ void BluetoothTask::Parse(byte newByte)
         // Check if this not start of cmd
         if (m_bufReceive[0] != '<')
         {
-            LOG << "Error: The letter " << m_bufReceive[0] << " is not << \n";
+            LOG << "Error: The letter " << m_bufReceive[0] << " is not < \n";
             ReverseOne();
         }
         // Check if not have enough bytes for minimum cmd
-        else if (m_counter < 5)
+        else if (m_counter < 6)
         {
             return;
         }
@@ -217,27 +225,35 @@ void BluetoothTask::Parse(byte newByte)
             int cmdLength = m_bufReceive[3] + (m_bufReceive[2] << 8);
 
             // Check if the command is more than buffer can hold
-            if (cmdLength > sizeof(m_bufReceive) - 5)
+            if (cmdLength > sizeof(m_bufReceive) - 6)
             {
                 LOG << "Error: Cmd length is " << cmdLength << "\n";
                 ReverseOne();
             }
             // Check if not get all the bytes of the command
-            else if (m_counter < cmdLength + 5)
+            else if (m_counter < cmdLength + 6)
             {
                 return;
             }
-            // Check if not get the '>' (end of the commmand)
-            else if (m_bufReceive[cmdLength + 4] != '>')
+            // Check if not get the '>' (end of the command)
+            else if (m_bufReceive[cmdLength + 5] != '>')
             {
-                LOG << "Error: The last letter is not '>', it is " << m_bufReceive[m_counter - 1] << "\n";
+                LOG << "buff " << m_bufReceive[0] << " " << 
+                m_bufReceive[1] << " " <<
+                m_bufReceive[2] << " " <<
+                m_bufReceive[3] << " " <<
+                m_bufReceive[4] << " " <<
+                m_bufReceive[5] << " " <<
+                m_bufReceive[6] << " " <<
+                "\n";
+                LOG << "Error: The last letter is not '>', it is " << m_bufReceive[cmdLength + 5] << "\n";
                 ReverseOne();
             }
             // Parse command success!!!
             else
             {
                 LOG << "Get command - " << (int)m_bufReceive[1] << ", command size - " << cmdLength << "\n";
-                HandleCmd((int)m_bufReceive[1], &m_bufReceive[4], cmdLength);
+                HandleCmd((int)m_bufReceive[1], &m_bufReceive[5], m_bufReceive[4], cmdLength);
 
                 // Assumming that the counter is point to last char of the command.
                 m_counter = 0;
@@ -255,8 +271,8 @@ void BluetoothTask::ReadFromBle()
         for (size_t i = 0; i < income_buff.size(); i++)
         {
             Parse(income_buff[i]);
-            // LOG << income_buff[i] << "\n";
-        }
+            LOG << income_buff[i] << "\n";
+        }        
     }
 }
 
@@ -267,12 +283,12 @@ void BluetoothTask::WriteToBLE(const char *value)
 
 void BluetoothTask::WriteToBLE(byte *buff, int buffLength)
 {
-    // LOG << "Writing :";
+    LOG << "Writing :";
 
-    // for (int i = 0; i < buffLength; i++)
-    // {
-    //     LOG << (int)buff[i] << ", ";
-    // }
-    // LOG << "\n";
+    for (int i = 0; i < buffLength; i++)
+    {
+        LOG << (int)buff[i] << ", ";
+    }
+    LOG << "\n";
     pCharacteristic->setValue(buff, buffLength);
 }
