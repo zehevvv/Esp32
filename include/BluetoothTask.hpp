@@ -15,9 +15,6 @@ protected:
     void onWrite(BLECharacteristic *pCharacteristic);
     void onConnect(BLEServer *pServer);
     void onDisconnect(BLEServer *pServer);
-    // uint32_t onPassKeyRequest();
-    // bool onConfirmPIN(uint32_t pass_key);
-    // void onAuthenticationComplete(ble_gap_conn_desc desc);
 
 private:
     void ReadFromBle();
@@ -33,4 +30,11 @@ private:
     byte m_bufReceive[10];
     uint8_t m_counter;
     int m_last_command_counter;
+    BLEServer *m_server = NULL;
+    BLECharacteristic *m_characteristic;
+    bool m_device_connected = false;
+    BLEService *m_service;
+    bool m_is_get_new_data = false;
+
+    static const int STATUS_INTERVAL = 3000;
 };

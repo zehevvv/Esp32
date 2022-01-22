@@ -6,72 +6,32 @@
 
 using namespace std;
 
-BLEServer *pServer = NULL;
-BLECharacteristic *pTxCharacteristic;
-// BLECharacteristic *pRxCharacteristic;
-bool deviceConnected = false;
-// bool oldDeviceConnected = false;
-// uint8_t txValue = 0;
-BLEService *pService;
-bool m_is_get_new_data = false;
-
-// See the following for generating UUIDs:
-// https://www.uuidgenerator.net/
-
-// #define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
-// #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
-// #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
-
-// /**  None of these are required as they will be handled by the library with defaults. **
-//  **                       Remove as you see fit for your needs                        */
-// class MyServerCallbacks : public BLEServerCallbacks
-// {
-//     void onConnect(BLEServer *pServer)
-//     {
-//         deviceConnected = true;
-//     };
-
-//     void onDisconnect(BLEServer *pServer)
-//     {
-//         deviceConnected = false;
-//     }
-// };
-
-// class MyCallbacks : public BLECharacteristicCallbacks
-// {
-//     void onWrite(BLECharacteristic *pCharacteristic)
-//     {
-//         m_is_get_new_data = true;
-//     }
-// };
-
-BluetoothTask::BluetoothTask() : m_counter(0),
-                                 m_last_command_counter(200)
+BluetoothTask::BluetoothTask() : 
+    m_counter(0),
+    m_last_command_counter(200)
 {
-
     // Create the BLE Device
-    BLEDevice::init("ISee2");
+    BLEDevice::init(BLUETOOTH_APP_NAME);
 
     // Create the BLE Server
-    pServer = BLEDevice::createServer();
-    pServer->setCallbacks(this);
+    m_server = BLEDevice::createServer();
+    m_server->setCallbacks(this);
 
     // Create the BLE Service
-    pService = pServer->createService(BLUETOOTH_SERVICE_UUID);
+    m_service = m_server->createService(BLUETOOTH_SERVICE_UUID);
 
     // Create a BLE Characteristic
-    pTxCharacteristic = pService->createCharacteristic(
+    m_characteristic = m_service->createCharacteristic(
         BLUETOOTH_CHARACTERISTIC_UUID,
-        NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::WRITE);
+        NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ);
 
-    pTxCharacteristic->setCallbacks(this);
+    m_characteristic->setCallbacks(this);
 
     // Start the service
-    pService->start();
+    m_service->start();
 
     // Start advertising
-    pServer->getAdvertising()->start();
-    Serial.println("Waiting a client connection to notify...");
+    m_server->getAdvertising()->start();
 }
 
 BluetoothTask::~BluetoothTask()
@@ -80,21 +40,26 @@ BluetoothTask::~BluetoothTask()
 
 void BluetoothTask::Run()
 {
-    if (m_is_get_new_data)
+    ReadFromBle();
+
+    if (m_device_connected)
     {
-        m_is_get_new_data = false;
-        ReadFromBle();
+        if (IsTimePass(STATUS_INTERVAL))
+        {
+            HandleGetBatteryLevelCmd();
+            HandleGetLevelVibrationCmd();
+        }
     }
 }
 
-void BluetoothTask::onConnect(BLEServer *pServer)
+void BluetoothTask::onConnect(BLEServer *m_server)
 {
-    deviceConnected = true;
+    m_device_connected = true;
 };
 
-void BluetoothTask::onDisconnect(BLEServer *pServer)
+void BluetoothTask::onDisconnect(BLEServer *m_server)
 {
-    deviceConnected = false;
+    m_device_connected = false;
 }
 
 void BluetoothTask::onWrite(BLECharacteristic *pCharacteristic)
@@ -235,14 +200,19 @@ void BluetoothTask::Parse(byte newByte)
 
 void BluetoothTask::ReadFromBle()
 {
-    if (pTxCharacteristic->getDataLength() > 0)
+    if (!m_is_get_new_data)
+        return;
+        
+    m_is_get_new_data = false;
+        
+    if (m_characteristic->getDataLength() > 0)
     {
-        string income_buff = pTxCharacteristic->getValue();
+        string income_buff = m_characteristic->getValue();
 
         for (size_t i = 0; i < income_buff.size(); i++)
         {
             Parse(income_buff[i]);
-            LOG << income_buff[i] << "\n";
+            // LOG << income_buff[i] << "\n";
         }
     }
 }
@@ -254,12 +224,12 @@ void BluetoothTask::WriteToBLE(const char *value)
 
 void BluetoothTask::WriteToBLE(byte *buff, int buffLength)
 {
-    LOG << "Writing :";
+    // LOG << "Writing :";
 
-    for (int i = 0; i < buffLength; i++)
-    {
-        LOG << (int)buff[i] << ", ";
-    }
-    LOG << "\n";
-    pTxCharacteristic->setValue(buff, buffLength);
+    // for (int i = 0; i < buffLength; i++)
+    // {
+    //     LOG << (int)buff[i] << ", ";
+    // }
+    // LOG << "\n";
+    m_characteristic->setValue(buff, buffLength);
 }
