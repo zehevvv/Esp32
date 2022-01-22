@@ -3,7 +3,7 @@
 #include "TaskManager.hpp"
 #include <NimBLEDevice.h>
 
-class BluetoothTask : public Task<BluetoothTask>, public BLEServerCallbacks
+class BluetoothTask : public Task<BluetoothTask>, public BLEServerCallbacks,  public BLECharacteristicCallbacks
 {
 friend Singleton<BluetoothTask>;
 protected:
@@ -12,11 +12,12 @@ protected:
     void Run();    
 
     // Callbacks of the bluetooth.
+    void onWrite(BLECharacteristic *pCharacteristic);
     void onConnect(BLEServer *pServer);
     void onDisconnect(BLEServer *pServer);
-    uint32_t onPassKeyRequest();
-    bool onConfirmPIN(uint32_t pass_key);
-    void onAuthenticationComplete(ble_gap_conn_desc desc);
+    // uint32_t onPassKeyRequest();
+    // bool onConfirmPIN(uint32_t pass_key);
+    // void onAuthenticationComplete(ble_gap_conn_desc desc);
 
 private:
     void ReadFromBle();

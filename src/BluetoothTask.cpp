@@ -7,15 +7,48 @@
 using namespace std;
 
 BLEServer *pServer = NULL;
-BLECharacteristic *pCharacteristic = NULL;
+BLECharacteristic *pTxCharacteristic;
+// BLECharacteristic *pRxCharacteristic;
 bool deviceConnected = false;
-bool oldDeviceConnected = false;
-uint32_t value = 0;
+// bool oldDeviceConnected = false;
+// uint8_t txValue = 0;
+BLEService *pService;
+bool m_is_get_new_data = false;
 
-BluetoothTask::BluetoothTask() : 
-    m_counter(0),
-    m_last_command_counter(200)
+// See the following for generating UUIDs:
+// https://www.uuidgenerator.net/
+
+// #define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
+// #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
+// #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+
+// /**  None of these are required as they will be handled by the library with defaults. **
+//  **                       Remove as you see fit for your needs                        */
+// class MyServerCallbacks : public BLEServerCallbacks
+// {
+//     void onConnect(BLEServer *pServer)
+//     {
+//         deviceConnected = true;
+//     };
+
+//     void onDisconnect(BLEServer *pServer)
+//     {
+//         deviceConnected = false;
+//     }
+// };
+
+// class MyCallbacks : public BLECharacteristicCallbacks
+// {
+//     void onWrite(BLECharacteristic *pCharacteristic)
+//     {
+//         m_is_get_new_data = true;
+//     }
+// };
+
+BluetoothTask::BluetoothTask() : m_counter(0),
+                                 m_last_command_counter(200)
 {
+
     // Create the BLE Device
     BLEDevice::init("ISee2");
 
@@ -24,44 +57,21 @@ BluetoothTask::BluetoothTask() :
     pServer->setCallbacks(this);
 
     // Create the BLE Service
-    BLEService *pService = pServer->createService(BLUETOOTH_SERVICE_UUID);
+    pService = pServer->createService(BLUETOOTH_SERVICE_UUID);
 
     // Create a BLE Characteristic
-    pCharacteristic = pService->createCharacteristic(
+    pTxCharacteristic = pService->createCharacteristic(
         BLUETOOTH_CHARACTERISTIC_UUID,
-        /******* Enum Type NIMBLE_PROPERTY now *******     
-                         BLECharacteristic::PROPERTY_READ   |
-                        BLECharacteristic::PROPERTY_WRITE  |
-                        BLECharacteristic::PROPERTY_NOTIFY |
-                        BLECharacteristic::PROPERTY_INDICATE
-                        );
-                    **********************************************/
-            NIMBLE_PROPERTY::READ |
-            NIMBLE_PROPERTY::WRITE |
-            NIMBLE_PROPERTY::NOTIFY |
-            NIMBLE_PROPERTY::INDICATE);
+        NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::WRITE);
 
-    // https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
-    // Create a BLE Descriptor
-    /***************************************************   
-     NOTE: DO NOT create a 2902 descriptor. 
-    it will be created automatically if notifications 
-    or indications are enabled on a characteristic.
+    pTxCharacteristic->setCallbacks(this);
 
-    pCharacteristic->addDescriptor(new BLE2902());
-    ****************************************************/
     // Start the service
     pService->start();
 
     // Start advertising
-    BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-    pAdvertising->addServiceUUID(BLUETOOTH_SERVICE_UUID);
-    pAdvertising->setScanResponse(false);
-    /** Note, this could be left out as that is the default value */
-    pAdvertising->setMinPreferred(0x0); // set value to 0x00 to not advertise this parameter
-
-    BLEDevice::startAdvertising();
-    LOG << "Waiting a client connection to notify... \n";
+    pServer->getAdvertising()->start();
+    Serial.println("Waiting a client connection to notify...");
 }
 
 BluetoothTask::~BluetoothTask()
@@ -70,60 +80,27 @@ BluetoothTask::~BluetoothTask()
 
 void BluetoothTask::Run()
 {
-    // notify changed value
-    if (deviceConnected)
+    if (m_is_get_new_data)
     {
+        m_is_get_new_data = false;
         ReadFromBle();
-    }
-    // disconnecting
-    if (!deviceConnected && oldDeviceConnected)
-    {
-        delay(500);                  // give the bluetooth stack the chance to get things ready
-        pServer->startAdvertising(); // restart advertising
-        LOG << "start advertising \n";
-        oldDeviceConnected = deviceConnected;
-    }
-    // connecting
-    if (deviceConnected && !oldDeviceConnected)
-    {
-        // do stuff here on connecting
-        oldDeviceConnected = deviceConnected;
     }
 }
 
-/**  None of these are required as they will be handled by the library with defaults. **
- **                       Remove as you see fit for your needs                        */
 void BluetoothTask::onConnect(BLEServer *pServer)
 {
-    LOG << "Bluetooth connected \n";
     deviceConnected = true;
 };
 
 void BluetoothTask::onDisconnect(BLEServer *pServer)
 {
-    LOG << "Bluetooth disconnected \n";
     deviceConnected = false;
 }
 
-/***************** New - Security handled here ********************
-****** Note: these are the same return values as defaults ********/
-uint32_t BluetoothTask::onPassKeyRequest()
+void BluetoothTask::onWrite(BLECharacteristic *pCharacteristic)
 {
-    LOG << "Server PassKeyRequest \n";
-    return 123456;
+    m_is_get_new_data = true;
 }
-
-bool BluetoothTask::onConfirmPIN(uint32_t pass_key)
-{
-    LOG << "The passkey YES/NO number: " << pass_key << "\n";
-    return true;
-}
-
-void BluetoothTask::onAuthenticationComplete(ble_gap_conn_desc desc)
-{
-    LOG << "Starting BLE work! \n";
-}
-/*******************************************************************/
 
 void BluetoothTask::HandleSetLevelVibrationCmd(byte *buff, int buffLength)
 {
@@ -167,7 +144,7 @@ void BluetoothTask::HandleGetBatteryLevelCmd()
     WriteToBLE(cmd, sizeof(cmd));
 }
 
-void BluetoothTask::HandleCmd(int cmdId, byte *buff, uint8_t command_counter,int buffLength)
+void BluetoothTask::HandleCmd(int cmdId, byte *buff, uint8_t command_counter, int buffLength)
 {
     // Check if this command is new
     if (command_counter == m_last_command_counter)
@@ -197,7 +174,7 @@ void BluetoothTask::ReverseOne()
     {
         m_bufReceive[i] = m_bufReceive[i + 1];
     }
-    
+
     m_counter--;
 }
 
@@ -238,14 +215,8 @@ void BluetoothTask::Parse(byte newByte)
             // Check if not get the '>' (end of the command)
             else if (m_bufReceive[cmdLength + 5] != '>')
             {
-                LOG << "buff " << m_bufReceive[0] << " " << 
-                m_bufReceive[1] << " " <<
-                m_bufReceive[2] << " " <<
-                m_bufReceive[3] << " " <<
-                m_bufReceive[4] << " " <<
-                m_bufReceive[5] << " " <<
-                m_bufReceive[6] << " " <<
-                "\n";
+                LOG << "buff " << m_bufReceive[0] << " " << m_bufReceive[1] << " " << m_bufReceive[2] << " " << m_bufReceive[3] << " " << m_bufReceive[4] << " " << m_bufReceive[5] << " " << m_bufReceive[6] << " "
+                    << "\n";
                 LOG << "Error: The last letter is not '>', it is " << m_bufReceive[cmdLength + 5] << "\n";
                 ReverseOne();
             }
@@ -264,15 +235,15 @@ void BluetoothTask::Parse(byte newByte)
 
 void BluetoothTask::ReadFromBle()
 {
-    if (pCharacteristic->getDataLength() > 0)
+    if (pTxCharacteristic->getDataLength() > 0)
     {
-        string income_buff = pCharacteristic->getValue();
+        string income_buff = pTxCharacteristic->getValue();
 
         for (size_t i = 0; i < income_buff.size(); i++)
         {
             Parse(income_buff[i]);
             LOG << income_buff[i] << "\n";
-        }        
+        }
     }
 }
 
@@ -290,5 +261,5 @@ void BluetoothTask::WriteToBLE(byte *buff, int buffLength)
         LOG << (int)buff[i] << ", ";
     }
     LOG << "\n";
-    pCharacteristic->setValue(buff, buffLength);
+    pTxCharacteristic->setValue(buff, buffLength);
 }
