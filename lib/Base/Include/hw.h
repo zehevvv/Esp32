@@ -26,3 +26,6 @@
 #define RANGE_SENSOR_SDA_PIN    (21)
 #define RANGE_SENSOR_SCL_PIN    (22)
 
+#define BLUETOOTH_SERVICE_UUID          ("4fafc201-1fb5-459e-8fdc-c6f9c331914b")
+#define BLUETOOTH_CHARACTERISTIC_UUID   ("beb5483e-36c2-4688-b9f5-ea07361b26a8")
+

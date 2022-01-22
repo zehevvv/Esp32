@@ -19,7 +19,7 @@ private:
 public:
     void AddTask(ITask* task);
     void start();
-    void CriticalError(char* error_msg);
+    void CriticalError(const char* error_msg);
 };
 
 

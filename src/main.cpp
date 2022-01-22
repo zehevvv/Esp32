@@ -3,7 +3,7 @@
 #include "TaskLed.hpp"
 #include "hw.h"
 #include "TaskManager.hpp"
-// #include "BluetoothTask.hpp"
+#include "BluetoothTask.hpp"
 #include "Registry.hpp"
 #include "OTA.hpp"
 #include "Logger.hpp"
@@ -22,9 +22,8 @@ void setup()
 	TaskLed::Instance();
 	RangeSensor::Instance();
 	Vibration::Instance();
-	// BluetoothTask::Instance();
+	BluetoothTask::Instance();
 	OTA::Instance();
-
 }
 
 void loop()

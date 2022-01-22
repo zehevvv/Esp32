@@ -12,9 +12,6 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint32_t value = 0;
 
-#define SERVICE_UUID "4fafc201-1fb5-459e-8fdc-c6f9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36c2-4688-b9f5-ea07361b26a8"
-
 BluetoothTask::BluetoothTask() : m_counter(0)
 {
     // Create the BLE Device
@@ -25,11 +22,11 @@ BluetoothTask::BluetoothTask() : m_counter(0)
     pServer->setCallbacks(this);
 
     // Create the BLE Service
-    BLEService *pService = pServer->createService(SERVICE_UUID);
+    BLEService *pService = pServer->createService(BLUETOOTH_SERVICE_UUID);
 
     // Create a BLE Characteristic
     pCharacteristic = pService->createCharacteristic(
-        CHARACTERISTIC_UUID,
+        BLUETOOTH_CHARACTERISTIC_UUID,
         /******* Enum Type NIMBLE_PROPERTY now *******     
                          BLECharacteristic::PROPERTY_READ   |
                         BLECharacteristic::PROPERTY_WRITE  |
@@ -37,7 +34,7 @@ BluetoothTask::BluetoothTask() : m_counter(0)
                         BLECharacteristic::PROPERTY_INDICATE
                         );
                     **********************************************/
-        NIMBLE_PROPERTY::READ |
+            NIMBLE_PROPERTY::READ |
             NIMBLE_PROPERTY::WRITE |
             NIMBLE_PROPERTY::NOTIFY |
             NIMBLE_PROPERTY::INDICATE);
@@ -56,7 +53,7 @@ BluetoothTask::BluetoothTask() : m_counter(0)
 
     // Start advertising
     BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-    pAdvertising->addServiceUUID(SERVICE_UUID);
+    pAdvertising->addServiceUUID(BLUETOOTH_SERVICE_UUID);
     pAdvertising->setScanResponse(false);
     /** Note, this could be left out as that is the default value */
     pAdvertising->setMinPreferred(0x0); // set value to 0x00 to not advertise this parameter

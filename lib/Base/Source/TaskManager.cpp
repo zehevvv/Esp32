@@ -30,7 +30,7 @@ void TaskManager::start()
     }
 }
 
-void TaskManager::CriticalError(char* error_msg)
+void TaskManager::CriticalError(const char* error_msg)
 {
     LOG << "//////////////////////////////" << "\n";
     LOG << "/////// CRITIVAL_ERROR ///////" << "\n";
