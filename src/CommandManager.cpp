@@ -12,33 +12,34 @@ CommandManager::~CommandManager()
 {
 }
 
-void CommandManager::HandleSetLevelVibrationCmd(byte *buff, int buffLength)
+void CommandManager::HandleSetConfigCmd(byte *buff, int buffLength)
 {
     if (buff == NULL)
     {
         LOG << "Error: The buffer of vibration command is null \n";
         return;
     }
-    if (buffLength != 1)
+    if (buffLength != sizeof(SET_CONFIG_CMD))
     {
-        LOG << "Error: The length of buffer of vibration command is not 1, actual length - " << buffLength << "\n";
+        LOG << "Error: The length of buffer of vibration command is not " << sizeof(SET_CONFIG_CMD) << " , actual length - " << buffLength << "\n";
     }
 
-    uint8_t level = buff[0];
-    Vibration::Instance()->SetPowerLevel(level);
-    LOG << "Set vibration level command with value - " << level << "\n";
+    SET_CONFIG_CMD* cmd = (SET_CONFIG_CMD*) buff;
+    Vibration::Instance()->SetPowerLevel(cmd->max_vibration_level);
+    LOG << "Set vibration level command with value - " << cmd->max_vibration_level << "\n";
 }
 
-void CommandManager::HandleGetLevelVibrationCmd()
+void CommandManager::HandleGetConfigCmd()
 {
     // LOG << "Get command \"Get level vibration\" \n";
-    byte cmd[6];
+    byte cmd[5 + sizeof(SET_CONFIG_CMD)];
     cmd[0] = '<';
     cmd[1] = 0; // ID
     cmd[2] = 0; // Length 2
-    cmd[3] = 1; // Length 1
-    cmd[4] = Vibration::Instance()->GetPowerLevel();
-    cmd[5] = '>';
+    cmd[3] =  sizeof(SET_CONFIG_CMD); // Length 1
+    SET_CONFIG_CMD* config = (SET_CONFIG_CMD*)&(cmd[4]);
+    config->max_vibration_level = Vibration::Instance()->GetPowerLevel();
+    cmd[sizeof(SET_CONFIG_CMD) + 4] = '>';
     
     BluetoothTask::Instance()->WriteToBLE(cmd, sizeof(cmd));
 }
@@ -61,10 +62,10 @@ void CommandManager::HandleCmd(int cmdId, byte *buff, int buffLength)
     switch (cmdId)
     {
     case 0:
-        HandleSetLevelVibrationCmd(buff, buffLength);
+        HandleSetConfigCmd(buff, buffLength);
         break;
     case 1:
-        HandleGetLevelVibrationCmd();
+        HandleGetConfigCmd();
         break;
     case 2:
         HandleGetBatteryLevelCmd();
@@ -150,6 +151,6 @@ void CommandManager::ReceiveData(string& data)
 void CommandManager::SendStatus()
 {
     HandleGetBatteryLevelCmd();
-    HandleGetLevelVibrationCmd();
+    HandleGetConfigCmd();
 }
     
