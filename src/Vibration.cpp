@@ -6,6 +6,7 @@
 #include "Logger.hpp"
 
 const string Vibration::REGISRTY_NAME_POWER_LEVEL = "power_level";
+const string Vibration::REGISRTY_NAME_PRINT_CYCLE_CONFIG = "print_cycle_config";
 
 Vibration::Vibration() :
     m_current_max_power(MAX_POWER)
@@ -20,6 +21,7 @@ Vibration::Vibration() :
 	digitalWrite(MOTOR_PIN_STANDBY, HIGH);
 	analogWrite(MOTOR_PIN_PWM_A, 0);
     m_power_level = Registry::Instance()->GetKey(REGISRTY_NAME_POWER_LEVEL.c_str(), DEFAULT_POWER_LEVEL);
+    m_print_cycle_config = Registry::Instance()->GetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG.c_str(), DEFAULT_PRINT_CYCLE_CONFIG);
     m_current_max_power = (MAX_POWER / 10) * m_power_level;
     LOG << "vibration level " << (int)m_power_level << ", max power " << (int)m_current_max_power << "\n";
 }
@@ -40,7 +42,9 @@ void Vibration::Run()
             next_cycle  = map(distance, 0, RangeSensor::MAX_RANGE_MM, 0, 300);
             uint16_t power  = map(distance, 0, RangeSensor::MAX_RANGE_MM, 0, m_current_max_power);
             power = MAX_POWER - power;
-            // LOG << "range = " << distance << ", next cycle = " << next_cycle << ", power = " << power << "\n";
+
+            if (m_print_cycle_config)
+                LOG << "range = " << distance << ", next cycle = " << next_cycle << ", power = " << power << "\n";
 
             if (is_vibration_off)
             {
@@ -85,5 +89,20 @@ void Vibration::SetPowerLevel(uint8_t power_level)
 uint8_t Vibration::GetPowerLevel()
 {
     return m_power_level;
+}
+
+
+void Vibration::SetEnablePrintCycleConfig(bool enable)
+{
+    if (m_print_cycle_config != enable)
+    {
+        m_print_cycle_config = enable;
+        Registry::Instance()->SetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG.c_str(), m_print_cycle_config);
+    }
+}
+
+bool Vibration::GetEnablePrintCycleConfig()
+{
+    return m_print_cycle_config;
 }
 
