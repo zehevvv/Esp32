@@ -31,9 +31,13 @@ public:
 template<typename T>
 T Registry::GetKey(const char* key, T default_value)
 {
-    if (std::is_same<T, uint32_t>::value || std::is_same<T, uint8_t>::value) 
+    if (std::is_same<T, uint32_t>::value || std::is_same<T, uint8_t>::value || std::is_same<T, uint16_t>::value) 
     {
         return m_preferences.getUInt(key, default_value);
+    }
+    else if (std::is_same<T, bool>::value ) 
+    {
+        return m_preferences.getBool(key, default_value);
     }
     else
     {
@@ -45,9 +49,13 @@ T Registry::GetKey(const char* key, T default_value)
 template<typename T>
 void Registry::SetKey(const char* key, T& value)
 {
-    if (std::is_same<T, uint32_t>::value || std::is_same<T, uint8_t>::value) 
+    if (std::is_same<T, uint32_t>::value || std::is_same<T, uint8_t>::value || std::is_same<T, uint16_t>::value) 
     {
         m_preferences.putUInt(key, value);
+    }
+    else if (std::is_same<T, bool>::value ) 
+    {
+        m_preferences.putBool(key, value);
     }
     else
     {

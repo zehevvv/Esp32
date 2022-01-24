@@ -63,7 +63,11 @@ uint16_t RangeSensor::GetRange()
 
 void RangeSensor::SetEnablePringRange(bool enable)
 {
-    m_print_range = enable;
+    if (m_print_range != enable)
+    {
+        m_print_range = enable;
+        Registry::Instance()->SetKey(REGISRTY_NAME_PRINT_RANGE.c_str(), m_print_range);
+    }
 }
 
 bool RangeSensor::GetEnablePringRange()

@@ -108,7 +108,7 @@ void Logger::SaveToOfflineBuf()
     }
 
     memcpy(&m_buf_offline[m_counter_offline], m_buf, size_to_copy);
-    m_counter_offline += m_counter;
+    m_counter_offline += size_to_copy;
 }
 
 void Logger::PrintOfflineBuf()
