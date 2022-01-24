@@ -18,17 +18,7 @@ protected:
 
 private:
     void ReadFromBle();
-    void Parse(byte newByte);
-    void ReverseOne();
-    void HandleCmd(int cmdId, byte *buff, int buffLength);
-    void HandleGetBatteryLevelCmd();
-    void HandleSetLevelVibrationCmd(byte* buff, int buffLength);
-    void HandleGetLevelVibrationCmd();
-    void WriteToBLE(const char* value);
-    void WriteToBLE(byte* buff, int buffLength);
 
-    byte m_bufReceive[10];
-    uint8_t m_counter;    
     BLEServer *m_server = NULL;
     BLECharacteristic *m_characteristic;
     bool m_device_connected = false;
@@ -36,4 +26,9 @@ private:
     bool m_is_get_new_data = false;
 
     static const int STATUS_INTERVAL = 10000;
+
+public:
+    void WriteToBLE(const char* value);
+    void WriteToBLE(byte* buff, int buffLength);
+
 };
