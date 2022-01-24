@@ -2,6 +2,7 @@
 #include "Logger.hpp"
 #include "Vibration.hpp"
 #include "BluetoothTask.hpp"
+#include "RangeSensor.hpp"
 
 CommandManager::CommandManager() : 
     m_counter(0)    
@@ -26,7 +27,9 @@ void CommandManager::HandleSetConfigCmd(byte *buff, int buffLength)
 
     SET_CONFIG_CMD* cmd = (SET_CONFIG_CMD*) buff;
     Vibration::Instance()->SetPowerLevel(cmd->max_vibration_level);
-    LOG << "Set vibration level command with value - " << cmd->max_vibration_level << "\n";
+    RangeSensor::Instance()->SetEnablePringRange(cmd->print_range_unfiltered);
+    LOG << "Set vibration level - " << cmd->max_vibration_level << "\n"
+        << "Set print enable - " << cmd->print_range_unfiltered << "\n";
 }
 
 void CommandManager::HandleGetConfigCmd()
@@ -39,6 +42,7 @@ void CommandManager::HandleGetConfigCmd()
     cmd[3] =  sizeof(SET_CONFIG_CMD); // Length 1
     SET_CONFIG_CMD* config = (SET_CONFIG_CMD*)&(cmd[4]);
     config->max_vibration_level = Vibration::Instance()->GetPowerLevel();
+    config->print_range_unfiltered = (uint8_t)RangeSensor::Instance()->GetEnablePringRange();
     cmd[sizeof(SET_CONFIG_CMD) + 4] = '>';
     
     BluetoothTask::Instance()->WriteToBLE(cmd, sizeof(cmd));

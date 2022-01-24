@@ -86,3 +86,4 @@ uint8_t Vibration::GetPowerLevel()
 {
     return m_power_level;
 }
+
