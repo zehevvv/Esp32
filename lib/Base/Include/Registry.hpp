@@ -15,7 +15,7 @@ protected:
     Registry();
     ~Registry();
 
-    static const string REGISTRY_NAME;
+    static const char* REGISTRY_NAME;
 
     Preferences m_preferences;
 
@@ -37,7 +37,7 @@ T Registry::GetKey(const char* key, T default_value)
     }
     else if (std::is_same<T, bool>::value ) 
     {
-        return m_preferences.getBool(key, default_value);
+       return m_preferences.getBool(key, default_value);
     }
     else
     {

@@ -3,7 +3,7 @@
 
 ///////////////////// System configuration /////////////////////
 
-#define LOGGER_BUFFER_SIZE              (200)
+#define LOGGER_BUFFER_SIZE              (300)
 #define LOGGER_OFFLINE_BUFFER_SIZE      (500)
 #define LOGGER_BROADCAST_IP             ("192.168.1.255")
 #define LOGGER_BROADCAST_PORT           (1338)

@@ -21,9 +21,9 @@ void setup()
 	Registry::Instance();
 	TaskLed::Instance();
 	RangeSensor::Instance();
-	Vibration::Instance();
-	BluetoothTask::Instance();
+	Vibration::Instance();	
 	OTA::Instance();
+	BluetoothTask::Instance();
 }
 
 void loop()

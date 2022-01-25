@@ -6,7 +6,7 @@
 #include "Logger.hpp"
 
 const string Vibration::REGISRTY_NAME_POWER_LEVEL = "power_level";
-const string Vibration::REGISRTY_NAME_PRINT_CYCLE_CONFIG = "print_cycle_config";
+const char* Vibration::REGISRTY_NAME_PRINT_CYCLE_CONFIG = "print_cycle";
 
 Vibration::Vibration() :
     m_current_max_power(MAX_POWER)
@@ -21,9 +21,10 @@ Vibration::Vibration() :
 	digitalWrite(MOTOR_PIN_STANDBY, HIGH);
 	analogWrite(MOTOR_PIN_PWM_A, 0);
     m_power_level = Registry::Instance()->GetKey(REGISRTY_NAME_POWER_LEVEL.c_str(), DEFAULT_POWER_LEVEL);
-    m_print_cycle_config = Registry::Instance()->GetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG.c_str(), DEFAULT_PRINT_CYCLE_CONFIG);
+    
+    m_print_cycle_config = Registry::Instance()->GetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG, DEFAULT_PRINT_CYCLE_CONFIG);
     m_current_max_power = (MAX_POWER / 10) * m_power_level;
-    LOG << "vibration level " << (int)m_power_level << ", max power " << (int)m_current_max_power << "\n";
+   LOG << "vibration level " << (int)m_power_level << ", max power " << (int)m_current_max_power << "\n";
 }
 
 Vibration::~Vibration()
@@ -97,7 +98,7 @@ void Vibration::SetEnablePrintCycleConfig(bool enable)
     if (m_print_cycle_config != enable)
     {
         m_print_cycle_config = enable;
-        Registry::Instance()->SetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG.c_str(), m_print_cycle_config);
+        Registry::Instance()->SetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG, m_print_cycle_config);
     }
 }
 
