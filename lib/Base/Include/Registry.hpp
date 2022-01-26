@@ -52,6 +52,7 @@ void Registry::SetKey(const char* key, T& value)
     if (std::is_same<T, uint32_t>::value || std::is_same<T, uint8_t>::value || std::is_same<T, uint16_t>::value) 
     {
         m_preferences.putUInt(key, value);
+        LOG << "Registery set key " << key << " with value" << value << ", but get " << m_preferences.getUInt(key) << "\n";
     }
     else if (std::is_same<T, bool>::value ) 
     {

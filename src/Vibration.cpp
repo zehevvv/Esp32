@@ -9,7 +9,7 @@ const string Vibration::REGISRTY_NAME_POWER_LEVEL = "power_level";
 const char* Vibration::REGISRTY_NAME_PRINT_CYCLE_CONFIG = "print_cycle";
 
 Vibration::Vibration() :
-    m_current_max_power(MAX_POWER)
+    m_max_power(MAX_POWER)
 {
     pinMode(MOTOR_PIN_IN_A_1, OUTPUT);
     pinMode(MOTOR_PIN_IN_A_2, OUTPUT);
@@ -23,8 +23,8 @@ Vibration::Vibration() :
     m_power_level = Registry::Instance()->GetKey(REGISRTY_NAME_POWER_LEVEL.c_str(), DEFAULT_POWER_LEVEL);
     
     m_print_cycle_config = Registry::Instance()->GetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG, DEFAULT_PRINT_CYCLE_CONFIG);
-    m_current_max_power = (MAX_POWER / 10) * m_power_level;
-   LOG << "vibration level " << (int)m_power_level << ", max power " << (int)m_current_max_power << "\n";
+    m_max_power = (MAX_POWER / 10) * m_power_level;
+   LOG << "vibration level " << (int)m_power_level << ", max power " << (int)m_max_power << "\n";
 }
 
 Vibration::~Vibration()
@@ -40,8 +40,9 @@ void Vibration::Run()
         uint16_t distance = RangeSensor::Instance()->GetRange();
         if (distance != RangeSensor::OUT_OF_RANGE)
         {
-            next_cycle  = map(distance, 0, RangeSensor::MAX_RANGE_MM, 0, 300);
-            uint16_t power  = map(distance, 0, RangeSensor::MAX_RANGE_MM, 0, m_current_max_power);
+            uint16_t max_range = RangeSensor::Instance()->GetMaxRange();
+            next_cycle  = map(distance, 0, max_range, 0, 300);
+            uint16_t power  = map(distance, 0, max_range, 0, m_max_power);
             power = MAX_POWER - power;
 
             if (m_print_cycle_config)
@@ -84,7 +85,7 @@ void Vibration::SetPowerLevel(uint8_t power_level)
 
     m_power_level = power_level;
     Registry::Instance()->SetKey(REGISRTY_NAME_POWER_LEVEL.c_str(), m_power_level);
-    m_current_max_power = (MAX_POWER / 10) * m_power_level;
+    m_max_power = (MAX_POWER / 10) * m_power_level;
 }
 
 uint8_t Vibration::GetPowerLevel()

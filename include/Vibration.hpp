@@ -29,7 +29,7 @@ private:
     static const char* REGISRTY_NAME_PRINT_CYCLE_CONFIG;
     static const bool DEFAULT_PRINT_CYCLE_CONFIG = false;
 
-    uint8_t m_current_max_power;
+    uint8_t m_max_power;    
     uint8_t m_power_level;
     bool m_print_cycle_config;
 
