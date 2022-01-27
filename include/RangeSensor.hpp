@@ -27,7 +27,10 @@ public:
     bool GetEnablePringRange();
     void SetMode(RANGE_SENSOR_MODE mode);
     RANGE_SENSOR_MODE GetMode();
+    uint16_t GetMinRange();
+    void SetMinRange(uint16_t min_range);    
     uint16_t GetMaxRange();
+    void SetMaxRange(uint16_t max_range);
 
     static const uint16_t OUT_OF_RANGE = 0xffff;
     static const uint16_t NUM_MEASORE = 3;
@@ -40,10 +43,17 @@ private:
     uint8_t             m_index;
     bool                m_print_range;
     RANGE_SENSOR_MODE   m_sensor_mode;
+    uint16_t            m_min_range;
     uint16_t            m_max_range;
+    uint16_t            m_max_absolute_range;
 
     static const string     REGISRTY_NAME_PRINT_RANGE;
     static const bool       DEFAULT_PRINT_RANGE = false;
     static const string     REGISRTY_NAME_MODE;
     static const uint8_t    DEFAULT_MODE = MODE_DEFAULT;
+    static const string     REGISRTY_NAME_MIN_RANGE;
+    static const uint16_t   DEFAULT_MIN_RANGEE = 0;
+    static const string     REGISRTY_NAME_MAX_RANGE;
+    static const uint16_t   DEFAULT_MAX_RANGEE = 1200;
+
 };

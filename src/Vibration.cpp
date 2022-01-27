@@ -37,16 +37,17 @@ void Vibration::Run()
     static bool is_vibration_off = false;
     if (IsTimePass(next_cycle))
     {
-        uint16_t distance = RangeSensor::Instance()->GetRange();
-        if (distance != RangeSensor::OUT_OF_RANGE)
+        uint16_t current_range = RangeSensor::Instance()->GetRange();
+        if (current_range != RangeSensor::OUT_OF_RANGE)
         {
+            uint16_t min_range = RangeSensor::Instance()->GetMinRange();
             uint16_t max_range = RangeSensor::Instance()->GetMaxRange();
-            next_cycle  = map(distance, 0, max_range, 0, 300);
-            uint16_t power  = map(distance, 0, max_range, 0, m_max_power);
+            next_cycle  = map(current_range, min_range, max_range, 0, 300);
+            uint16_t power  = map(current_range, min_range, max_range, 0, m_max_power);
             power = MAX_POWER - power;
 
             if (m_print_cycle_config)
-                LOG << "range = " << distance << ", next cycle = " << next_cycle << ", power = " << power << "\n";
+                LOG << "range = " << current_range << ", next cycle = " << next_cycle << ", power = " << power << "\n";
 
             if (is_vibration_off)
             {
