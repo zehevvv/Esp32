@@ -27,7 +27,8 @@ void CommandManager::HandleSetConfigCmd(byte *buff, int buffLength)
     }
 
     SET_CONFIG_CMD* cmd = (SET_CONFIG_CMD*) buff;
-    Vibration::Instance()->SetPowerLevel(cmd->max_vibration_level);
+    Vibration::Instance()->SetMinPower(cmd->min_vibration_level);
+    Vibration::Instance()->SetMaxPower(cmd->max_vibration_level);
     RangeSensor::Instance()->SetEnablePringRange(cmd->print_range_unfiltered);
     TaskLed::Instance()->SetEnablePringAlive(cmd->print_alive);
     Vibration::Instance()->SetEnablePrintCycleConfig(cmd->print_cycle_config);
@@ -37,7 +38,8 @@ void CommandManager::HandleSetConfigCmd(byte *buff, int buffLength)
     Vibration::Instance()->SetMinCycle(cmd->min_cycle);
     Vibration::Instance()->SetMaxCycle(cmd->max_cycle);
     
-    LOG << "Set vibration level - " << cmd->max_vibration_level << "\n"
+    LOG << "Set min vibration - " << cmd->min_vibration_level << "\n"
+        << "Set max vibration - " << cmd->max_vibration_level << "\n"
         << "Set print enable - " << cmd->print_range_unfiltered << "\n"
         << "Set print alive - " << cmd->print_alive << "\n"
         << "Set print cycle config - " << cmd->print_cycle_config << "\n"
@@ -59,7 +61,8 @@ void CommandManager::HandleGetConfigCmd()
     cmd[sizeof(SET_CONFIG_CMD) + 4] = '>';
 
     SET_CONFIG_CMD* config = (SET_CONFIG_CMD*)&(cmd[4]);
-    config->max_vibration_level = Vibration::Instance()->GetPowerLevel();
+    config->min_vibration_level = Vibration::Instance()->GetMinPower();
+    config->max_vibration_level = Vibration::Instance()->GetMaxPower();
     config->print_range_unfiltered = (uint8_t)RangeSensor::Instance()->GetEnablePringRange();
     config->print_alive = (uint8_t)TaskLed::Instance()->GetEnablePringAlive();
     config->print_cycle_config = (uint8_t)Vibration::Instance()->GetEnablePrintCycleConfig();
