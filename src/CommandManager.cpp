@@ -37,6 +37,7 @@ void CommandManager::HandleSetConfigCmd(byte *buff, int buffLength)
     RangeSensor::Instance()->SetMaxRange(cmd->max_range);
     Vibration::Instance()->SetMinCycle(cmd->min_cycle);
     Vibration::Instance()->SetMaxCycle(cmd->max_cycle);
+    Vibration::Instance()->SetEnableVibration(cmd->enable_vibration);
     
     LOG << "Set min vibration - " << cmd->min_vibration_level << "\n"
         << "Set max vibration - " << cmd->max_vibration_level << "\n"
@@ -47,7 +48,8 @@ void CommandManager::HandleSetConfigCmd(byte *buff, int buffLength)
         << "Set min range - " << cmd->min_range << "\n"
         << "Set max range - " << cmd->max_range << "\n"
         << "Set min cycle - " << cmd->min_cycle << "\n"
-        << "Set max cycle - " << cmd->max_cycle << "\n";
+        << "Set max cycle - " << cmd->max_cycle << "\n"
+        << "Set enable vibration - " << cmd->enable_vibration << "\n";
 }
 
 void CommandManager::HandleGetConfigCmd()
@@ -71,6 +73,7 @@ void CommandManager::HandleGetConfigCmd()
     config->max_range = RangeSensor::Instance()->GetMaxRange();
     config->min_cycle = Vibration::Instance()->GetMinCycle();
     config->max_cycle = Vibration::Instance()->GetMaxCycle();
+    config->enable_vibration = Vibration::Instance()->GetEnableVibration();
     
     BluetoothTask::Instance()->WriteToBLE(cmd, sizeof(cmd));
 }

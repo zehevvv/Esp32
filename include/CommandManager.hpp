@@ -37,7 +37,7 @@ typedef struct SET_CONFIG_CMD
     uint8_t min_vibration_level;
     uint8_t max_vibration_level;
     uint8_t sensor_mode;
-    uint8_t range_filtering;
+    uint8_t enable_vibration;
     uint8_t print_range_unfiltered;
     uint8_t print_cycle_config;
     uint8_t print_alive;  

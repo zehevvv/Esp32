@@ -7,9 +7,10 @@
 
 const string Vibration::REGISRTY_NAME_MIN_POWER = "min_power";
 const string Vibration::REGISRTY_NAME_MAX_POWER = "max_power";
-const char* Vibration::REGISRTY_NAME_PRINT_CYCLE_CONFIG = "print_cycle";
+const string Vibration::REGISRTY_NAME_PRINT_CYCLE_CONFIG = "print_cycle";
 const string Vibration::REGISRTY_NAME_MIN_CYCLE = "min_cycle";
 const string Vibration::REGISRTY_NAME_MAX_CYCLE = "max_cycle";
+const string Vibration::REGISRTY_NAME_ENABLE_VIBRATION = "enable_vib";
 
 Vibration::Vibration() :
     m_max_power(MAX_POWER)
@@ -26,12 +27,17 @@ Vibration::Vibration() :
 
     m_min_power = Registry::Instance()->GetKey(REGISRTY_NAME_MIN_POWER.c_str(), DEFAULT_MIN_POWER);
     m_max_power = Registry::Instance()->GetKey(REGISRTY_NAME_MAX_POWER.c_str(), DEFAULT_MAX_POWER);
-    m_print_cycle_config = Registry::Instance()->GetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG, DEFAULT_PRINT_CYCLE_CONFIG);
+    m_print_cycle_config = Registry::Instance()->GetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG.c_str(), DEFAULT_PRINT_CYCLE_CONFIG);
     m_min_cycle = Registry::Instance()->GetKey(REGISRTY_NAME_MIN_CYCLE.c_str(), DEFAULT_MIN_CYCLE);
     m_max_cycle = Registry::Instance()->GetKey(REGISRTY_NAME_MAX_CYCLE.c_str(), DEFAULT_MAX_CYCLE);
+    m_enable_vibration = Registry::Instance()->GetKey(REGISRTY_NAME_ENABLE_VIBRATION.c_str(), DEFAULT_ENABLE_VIBRATION);
     
-    LOG <<  "Vibration init, Min power - " << (int)m_min_power << ", Max power - " << (int)m_max_power << 
-            ", Min cycle - " << m_min_cycle << ", Max cycle - " << m_max_cycle << "\n";
+    LOG <<  "Vibration init:\n" <<
+            "Min power - " << m_min_power << "\n" <<
+            "Max power - " << m_max_power << "\n" <<
+            "Min cycle - " << m_min_cycle << "\n" << 
+            "Max cycle - " << m_max_cycle << "\n"
+            "Enable bibration - " << m_enable_vibration << "\n";
 }
 
 Vibration::~Vibration()
@@ -77,8 +83,15 @@ void Vibration::Run()
 
 void Vibration::SetPower(uint8_t power)
 {
-    uint8_t val =  power = (MAX_POWER / 10) * power;
-    analogWrite(MOTOR_PIN_PWM_A, val);
+    if (m_enable_vibration)
+    {
+        uint8_t val =  power = (MAX_POWER / 10) * power;
+        analogWrite(MOTOR_PIN_PWM_A, val);
+    }
+    else
+    {
+        analogWrite(MOTOR_PIN_PWM_A, 0);
+    }
 }
 
 void Vibration::SetMaxPower(uint8_t max_power)
@@ -127,7 +140,7 @@ void Vibration::SetEnablePrintCycleConfig(bool enable)
     if (m_print_cycle_config != enable)
     {
         m_print_cycle_config = enable;
-        Registry::Instance()->SetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG, m_print_cycle_config);
+        Registry::Instance()->SetKey(REGISRTY_NAME_PRINT_CYCLE_CONFIG.c_str(), m_print_cycle_config);
     }
 }
 
@@ -162,4 +175,18 @@ void Vibration::SetMaxCycle(uint16_t max_cycle)
 uint16_t Vibration::GetMaxCycle()
 {
     return m_max_cycle;
+}
+
+void Vibration::SetEnableVibration(bool enable)
+{
+    if (m_enable_vibration != enable)
+    {
+        m_enable_vibration = enable;
+        Registry::Instance()->SetKey(REGISRTY_NAME_ENABLE_VIBRATION.c_str(), m_enable_vibration);
+    }
+}
+
+bool Vibration::GetEnableVibration()
+{
+    return m_enable_vibration;
 }

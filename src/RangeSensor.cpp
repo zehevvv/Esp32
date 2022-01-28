@@ -27,9 +27,9 @@ RangeSensor::RangeSensor() :
     m_min_range = Registry::Instance()->GetKey(REGISRTY_NAME_MIN_RANGE.c_str(), DEFAULT_MIN_RANGEE);
     m_max_range = Registry::Instance()->GetKey(REGISRTY_NAME_MAX_RANGE.c_str(), DEFAULT_MAX_RANGEE);
     
-    LOG << "Range Sensor init, print range - " << m_print_range 
-        << ", mode - " << (int)m_sensor_mode 
-        << ", min range - " << m_min_range
+    LOG << "Range Sensor init, print range - " << m_print_range << "\n"
+        << ", mode - " << (int)m_sensor_mode << "\n"
+        << ", min range - " << m_min_range << "\n"
         << ", max range - " << m_max_range << "\n";
 
     if (!s_device.begin())
