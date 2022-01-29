@@ -15,6 +15,8 @@
 
 #define SERIAL_BAUDRATE     (115200)
 
+#define LED_PIN                 (16)  //(2)
+
 ////////////////////////////////////////////////////////////////
 
 
@@ -23,7 +25,6 @@
 #define MOTOR_PIN_STANDBY	    (32)
 #define MOTOR_PIN_PWM_A		    (26)
 
-#define LED_PIN                 (2)
 
 #define RANGE_SENSOR_SDA_PIN    (21)
 #define RANGE_SENSOR_SCL_PIN    (22)

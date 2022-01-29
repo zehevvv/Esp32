@@ -35,7 +35,7 @@ private:
     static const string REGISRTY_NAME_PRINT_CYCLE_CONFIG;
     static const bool DEFAULT_PRINT_CYCLE_CONFIG = false;
     static const string REGISRTY_NAME_MIN_CYCLE;
-    static const uint16_t DEFAULT_MIN_CYCLE = 0;
+    static const uint16_t DEFAULT_MIN_CYCLE = 1;
     static const string REGISRTY_NAME_MAX_CYCLE;
     static const uint16_t DEFAULT_MAX_CYCLE = 300;
     static const string REGISRTY_NAME_MIN_POWER;
