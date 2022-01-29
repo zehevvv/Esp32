@@ -55,9 +55,15 @@ void Vibration::Run()
         {
             uint16_t min_range = RangeSensor::Instance()->GetMinRange();
             uint16_t max_range = RangeSensor::Instance()->GetMaxRange();
+            if (current_range > max_range)
+                current_range = max_range;
+            else if (current_range < min_range)
+                current_range = min_range;
+
             next_cycle  = map(current_range, min_range, max_range, m_min_cycle, m_max_cycle);
+
             uint16_t power = map(current_range, min_range, max_range, m_min_power, m_max_power);
-            power = MAX_POWER - power;
+            power = m_max_power - power;
 
             if (m_print_cycle_config)
                 LOG << "range = " << current_range << ", next cycle = " << next_cycle << ", power = " << power << "\n";
@@ -85,7 +91,7 @@ void Vibration::SetPower(uint8_t power)
 {
     if (m_enable_vibration)
     {
-        uint8_t val =  power = (MAX_POWER / 10) * power;
+        uint8_t val = ((float)((float)MAX_POWER / 10.0) * (float)power);
         analogWrite(MOTOR_PIN_PWM_A, val);
     }
     else
