@@ -1,16 +1,13 @@
 #include "RangeSensor.hpp"
 #include "Vibration.hpp"
-#include "TaskLed.hpp"
-#include "hw.h"
 #include "TaskManager.hpp"
 #include "BluetoothTask.hpp"
-#include "Registry.hpp"
 #include "OTA.hpp"
-#include "Logger.hpp"
+#include "hw.h"
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(SERIAL_BAUDRATE);
 
 	// wait until serial port opens for native USB devices
 	while (!Serial)
@@ -18,12 +15,12 @@ void setup()
 		delay(1);
 	}
 
-	Registry::Instance();
-	TaskLed::Instance();
-	RangeSensor::Instance();
-	Vibration::Instance();	
-	OTA::Instance();
-	BluetoothTask::Instance();
+	if (OTA::Instance()->IsSystemStable())
+	{
+		RangeSensor::Instance();
+		Vibration::Instance();	
+		BluetoothTask::Instance();
+	}
 }
 
 void loop()

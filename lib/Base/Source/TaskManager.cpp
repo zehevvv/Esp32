@@ -35,11 +35,11 @@ void TaskManager::CriticalError(const char* error_msg)
     LOG << "//////////////////////////////" << "\n";
     LOG << "/////// CRITIVAL_ERROR ///////" << "\n";
     LOG << "//////////////////////////////" << "\n";
-    LOG << error_msg << "/n";
+    LOG << error_msg << "\n";
     LOG << "//////////////////////////////" << "\n";
 
     uint64_t start_time = millis();
-    while(millis() - start_time < 10000)
+    while(millis() - start_time < 1000)
     {
         Network::Instance()->Run();
         Logger::Instance()->Run();

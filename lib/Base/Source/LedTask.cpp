@@ -1,4 +1,4 @@
-#include "TaskLed.hpp"
+#include "LedTask.hpp"
 #include "hw.h"
 #include "iostream"
 #include "Logger.hpp"
@@ -6,26 +6,27 @@
 
 using namespace std;
 
-const string TaskLed::REGISRTY_NAME_PRINT_ALIVE = "print_alive";
+const string LedTask::REGISRTY_NAME_PRINT_ALIVE = "print_alive";
 
-TaskLed::TaskLed()
+LedTask::LedTask()
 {
     pinMode(LED_PIN, OUTPUT);
     m_start_waiting = 0;
     m_time_to_wait = 0;    
+    m_blink_time = BLINK_TIME_STABLE_SYSTEM;
 
     m_print_alive = Registry::Instance()->GetKey(REGISRTY_NAME_PRINT_ALIVE.c_str(), DEFAULT_PRINT_ALIVE);
 }
 
-TaskLed::~TaskLed()
+LedTask::~LedTask()
 {
 }
 
-void TaskLed::Run()
+void LedTask::Run()
 {
     static int counter = 0;
 
-    if (IsTimePass(500))
+    if (IsTimePass(m_blink_time / 2))
     {
         if ((counter % 2) == 0)
         {
@@ -43,7 +44,7 @@ void TaskLed::Run()
     }
 }
 
-void TaskLed::SetEnablePringAlive(bool enable)
+void LedTask::SetEnablePringAlive(bool enable)
 {
     if (m_print_alive != enable)
     {
@@ -52,7 +53,12 @@ void TaskLed::SetEnablePringAlive(bool enable)
     }
 }
 
-bool TaskLed::GetEnablePringAlive()
+bool LedTask::GetEnablePringAlive()
 {
     return m_print_alive;
+}
+
+void LedTask::SetUnstableSystemBlink()
+{
+    m_blink_time = BLINK_TIME_UNSTABLE_SYSTEM;
 }

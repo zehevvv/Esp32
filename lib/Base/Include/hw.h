@@ -13,6 +13,8 @@
 // The password of your WIFI
 #define NETWORK_PASSWORD    ("0525353109")
 
+#define SERIAL_BAUDRATE     (115200)
+
 ////////////////////////////////////////////////////////////////
 
 

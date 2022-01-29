@@ -3,7 +3,7 @@
 #include "Vibration.hpp"
 #include "BluetoothTask.hpp"
 #include "RangeSensor.hpp"
-#include "TaskLed.hpp"
+#include "LedTask.hpp"
 
 CommandManager::CommandManager() : 
     m_counter(0)    
@@ -30,7 +30,7 @@ void CommandManager::HandleSetConfigCmd(byte *buff, int buffLength)
     Vibration::Instance()->SetMinPower(cmd->min_vibration_level);
     Vibration::Instance()->SetMaxPower(cmd->max_vibration_level);
     RangeSensor::Instance()->SetEnablePringRange(cmd->print_range_unfiltered);
-    TaskLed::Instance()->SetEnablePringAlive(cmd->print_alive);
+    LedTask::Instance()->SetEnablePringAlive(cmd->print_alive);
     Vibration::Instance()->SetEnablePrintCycleConfig(cmd->print_cycle_config);
     RangeSensor::Instance()->SetMode((RANGE_SENSOR_MODE)cmd->sensor_mode);
     RangeSensor::Instance()->SetMinRange(cmd->min_range);
@@ -66,7 +66,7 @@ void CommandManager::HandleGetConfigCmd()
     config->min_vibration_level = Vibration::Instance()->GetMinPower();
     config->max_vibration_level = Vibration::Instance()->GetMaxPower();
     config->print_range_unfiltered = (uint8_t)RangeSensor::Instance()->GetEnablePringRange();
-    config->print_alive = (uint8_t)TaskLed::Instance()->GetEnablePringAlive();
+    config->print_alive = (uint8_t)LedTask::Instance()->GetEnablePringAlive();
     config->print_cycle_config = (uint8_t)Vibration::Instance()->GetEnablePrintCycleConfig();
     config->sensor_mode = (uint8_t)RangeSensor::Instance()->GetMode();
     config->min_range = RangeSensor::Instance()->GetMinRange();
